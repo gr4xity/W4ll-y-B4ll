@@ -8,6 +8,24 @@ Red [
 
 ;system/reactivity/debug?: false
 
+
+about: layout [
+	title "About Wall Y Ball"
+	below
+	text 310x32 center font-name "Formera" font-size 14 "W4ll Y B4ll! 0.1 - A Chaoskampf Prototype"
+rich-text 316x200 font-name "Formera" font-size 12 {Move your paddle with the mouse to keep the balls in play!
+
+Each round, the first player to drop 4 balls is eliminated. The weakest player is replaced with a wall, intensifying the action. Last player standing faces a challenge of endurance, skill, and luck!
+
+Press the SPACE key or click the mouse button to start each round or pause the game.}
+with [data: []]
+	across
+	button "Ok" [unview about]
+	button "Information" [browse https://www.gravity4x.com/blog]
+	button "Feedback" [browse to-url {mailto:justin@gravity4x.com?subject=Wall Y Ball 0.1}]
+	button "Say Thanks" [browse https://www.paypal.me/Chaoskampf/5]
+]
+
 standard-uniform: function [
 	"Returns a pseudorandom float from standard uniform distribution"
 ][
@@ -15,7 +33,7 @@ standard-uniform: function [
 ]
 
 box-muller: function [
-	{Returns a set of two independent pseudorandom floats
+	{Returns a point composed of two independent pseudorandom floats
 	from the standard normal distribution}
 ][
 	theta: 2 * pi * standard-uniform					; uniformly random angle
@@ -27,52 +45,41 @@ box-muller: function [
 ]
 
 font-subtitle: make font! [
-;	name: "FuturaRener"
 	name: "Formera"
 	size: 36
 ]
 
 font-title: make font! [
-;	name: "FuturaRener"
 	name: "Formera"
 	size: 96
 ]
 
 font-suptitle: make font! [
-;	name: "FuturaRener"
 	name: "Formera"
 	size: 108
 ]
 
 font-supertitle: make font! [
-;	name: "FuturaRener"
 	name: "Formera"
 	size: 148
 ]
 
 
 config: make graphecs/config [
-	fps: tps: 30				; actual and targetd frames/ticks per second
+	fps: tps: 60				; actual and targetd frames/ticks per second
 	show-fps?: false
 	running?: true				; iterate while true, exit when false
 	playing?: false
 	starting-balls: 4
-;	window-size: 1280x640		; fixed
-;	window-size: 1920x960		; fixed
-;	window-size: 960x960		; fixed
-;	window-size: 1000x1000
-;	window-size: 640x640
-	window-y: 0.9 * system/view/screens/1/size/y
-	window-size: as-pair window-y window-y
+	window-size: 0.8 * as-pair system/view/screens/1/size/y system/view/screens/1/size/y
 	mouse-coord: 0x0
-
 
 	; define speed limits accordingly
 	global-speed-limit: to point2D! reduce [
-		window-size/x / tps / 3
-		window-size/x / tps / 3
+		window-size/x / tps / 1.5
+		window-size/x / tps / 1.5
 	]
-	bumper-speed-ratio: 85%
+	bumper-speed-ratio: 75%
 
 	; define entity sizes accordingly
 	vertical-paddle-size: as-pair 2 window-size/y / 12
@@ -119,6 +126,70 @@ config: make graphecs/config [
 		right	[object!]
 	][
 		right/physics/position/(left/player/axis) - left/physics/position/(left/player/axis) - ((right/physics/position/(left/bumper/axis) - left/physics/position/(left/bumper/axis)) * right/physics/velocity/(left/player/axis) / right/physics/velocity/(left/bumper/axis))
+	]
+
+	restart-game: does [
+		g: w4llYb4ll!
+		foreach bumper g/collections/bumper? [
+			bumper: g/entities/:bumper
+			unless bumper/components/player? [
+				; TODO: this fails to create prior reactive functions on object
+				bumper/components/player: context compose/deep [axis: (select ['x 'y 'x] bumper/components/bumper/axis) side: (to-lit-word bumper/id)]
+
+				; reset face
+				switch bumper/components/player/axis [
+					x [
+						bumper/components/face/size: horizontal-paddle-size
+						bumper/components/face/draw: draw-horizontal-paddle
+					]
+					y [
+						bumper/components/face/size: vertical-paddle-size
+						bumper/components/face/draw: draw-vertical-paddle
+					]
+				]
+
+				; redraw face in active object
+				fob: get bumper/id
+				fob/size: bumper/components/face/size
+				bind bumper/components/face/draw bumper/components
+				bind bumper/components/face/draw bumper/components/face	; evaluate face's draw code in context of face component
+				fob/draw: compose/deep bumper/components/face/draw
+			]
+
+			foreach board g/collections/scoreboard? [
+				board: g/entities/:board
+
+				; hide all the balls
+				foreach edge board/components/balling [
+					fob: get edge/rid
+					ball: g/entities/(edge/rid)
+					fob/visible?: ball/components/face/visible?: false
+				]
+
+				; reset scores
+				foreach edge board/components/scoring [
+					edge/weight: starting-balls
+					mark: get to-word rejoin [edge/rid '-score]
+					mark/3: form edge/weight
+				]
+			]
+		]
+	]
+
+	pause-resume: does [
+
+	playing?: not playing?
+either equal? playing? main/pane/2/visible? [
+][
+	restart-game
+]
+
+		st: find splash/draw/4/3 'subtag
+		st/4: { Don't drop the b4lls....}
+		st: find splash/draw/4/3 'subcom
+		st/4: {to start / pause}
+
+		main/pane/2/visible?: not playing?	;not main/pane/2/visible?
 	]
 
 	components: [
@@ -253,38 +324,6 @@ config: make graphecs/config [
 				visible?: false
 			]
 		]
-;		top [
-;			bumper [axis: 'y]
-;			physics [
-;				position: to point2D! reduce [
-;					window-size/x / 2
-;					buffer/y
-;				]
-;			]
-;			face [
-;				size: as-pair window-size/x 1
-;				draw: [
-;					pen (color) ;line-width (size/x)
-;					line 0x0 (size)
-;				]
-;			]
-;		]
-;		bottom [
-;			bumper [axis: 'y]
-;			physics [
-;				position: to point2D! reduce [
-;					window-size/x / 2
-;					window-size/y - buffer/y
-;				]
-;			]
-;			face [
-;				size: as-pair window-size/x 1
-;				draw: [
-;					pen (color) ;line-width (size/x)
-;					line 0x0 (size)
-;				]
-;			]
-;		]
 		top [
 			player [axis: 'x side: 'top]
 			bumper [axis: 'y]
@@ -301,9 +340,9 @@ config: make graphecs/config [
 			limiter [speed: global-speed-limit * bumper-speed-ratio]
 	;		following-ai []
 	;		tracking-ai []
-			extrapolating-ai []
+	;		extrapolating-ai []
 	;		centering-ai []
-	;		forgiving-ai []
+			forgiving-ai []
 		]
 		bottom [
 			player [axis: 'x side: 'bottom]
@@ -318,13 +357,13 @@ config: make graphecs/config [
 				size: horizontal-paddle-size
 				draw: draw-horizontal-paddle
 			]
-			limiter [speed: global-speed-limit * bumper-speed-ratio]
+	;		limiter [speed: global-speed-limit * bumper-speed-ratio]
 	;		following-ai []
 	;		tracking-ai []
 	;		extrapolating-ai []
-			centering-ai []
+	;		centering-ai []
 	;		forgiving-ai []
-	;		mouse-control []
+			mouse-control []
 		]
 		left [
 			player [axis: 'y side: 'left]
@@ -341,10 +380,10 @@ config: make graphecs/config [
 			]
 			limiter [speed: global-speed-limit * bumper-speed-ratio]
 	;		following-ai []
-			tracking-ai []
+	;		tracking-ai []
 	;		extrapolating-ai []
 	;		centering-ai []
-	;		forgiving-ai []
+			forgiving-ai []
 	;		mouse-control []
 		]
 		right [
@@ -406,7 +445,7 @@ config: make graphecs/config [
 
 		reset? [scoreboard?][
 ;			playing?
-			not none? scoreboard/lost
+			word? scoreboard/lost
 		]
 	]
 	connections: [
@@ -452,12 +491,12 @@ config: make graphecs/config [
 
 		; how well am I following the ball?
 		; weight is difference in position
-		following [player? physics?] [ball? visible? physics?] [
-			right/physics/position - left/physics/position
-		]
-		tracking [player? physics?] [ball? visible? physics?] [
-			right/physics/position - left/physics/position + right/physics/velocity
-		]
+;		following [player? physics?] [ball? visible? physics?] [
+;			right/physics/position - left/physics/position
+;		]
+;		tracking [player? physics?] [ball? visible? physics?] [
+;			right/physics/position - left/physics/position + right/physics/velocity
+;		]
 		; how well am I getting ahead of the ball?
 		; horizontal weight is timesteps to intersecting horizontally
 		; vertical weight is vertical acceleration needed to reach extrapolated level
@@ -470,7 +509,7 @@ config: make graphecs/config [
 			(right/physics/position/(left/bumper/axis) - left/physics/position/(left/bumper/axis)) / (left/physics/velocity/(left/bumper/axis) - right/physics/velocity/(left/bumper/axis))
 		]
 
-		mousing [mouse-control? physics?] [mouse?] [
+		mousing [player? mouse-control? physics?] [mouse?] [
 			right/mouse/position - left/physics/position
 ;			right/mouse/velocity
 		]
@@ -499,32 +538,24 @@ config: make graphecs/config [
 
 		scoring [weight = 0 not reset?] [] [
 
-			; pause game
-			playing?: false
-
-			; update and show splash
 			splash: main/pane/2
 			st: find splash/draw/4/3 'subtag
-			st/4: form reduce [pad/left form edge/rid 6 "player eliminated"]
-			st: find splash/draw/4/3 'subcom
-			st/4: "for next round!"
-			splash/visible?: true
+			sc: find splash/draw/4/3 'subcom
 
-			scoreboard/lost: edge/rid
+			either 1 < length? left/scoring [
+				; pause game
+				playing?: false
+
+				; update splash
+				st/4: form reduce [pad/left form edge/rid 6 "player eliminated"]
+				sc/4: "for next round!"
+			][
+				st/4: form reduce [pad/left form edge/rid 6 "player triumphant"]
+				sc/4: "for new game!"
+			]
+			splash/visible?: true		; show updated splash
+			scoreboard/lost: edge/rid	; trigger next round
 		]
-
-;		serving [true] [] [
-;			; recolor net
-;			left/face/color: right/face/color
-;
-;			right/physics/position/y: random left/face/size/y
-;			right/physics/position/x: left/face/size/x / 2
-;			right/physics/velocity/x: right/physics/velocity/x * random/only [-1 1]
-;			right/physics/velocity/y: right/physics/velocity/y * random/only [-1 1]
-;
-;			fob: get right/id
-;			fob/visible?: right/face/visible?: true
-;		]
 
 		; pre-process anticipated collisions
 		bouncing [
@@ -554,14 +585,11 @@ config: make graphecs/config [
 		]
 	]
 	entity-systems: [
+
 		reset [
 			scoreboard? reset?
 		][
 
-
-;print "RESETTING!!!"
-;? playing?
-;? scoreboard/lost
 if playing? [	; this is a hack, not sure why can't bring logic up the chain!
 
 			; get key entities
@@ -605,6 +633,12 @@ if playing? [	; this is a hack, not sure why can't bring logic up the chain!
 			mark: get to-word rejoin [scoreboard/lost '-score]
 			mark/3: ""
 
+
+if empty? scoring [
+	main/pane/2/visible?: true
+
+]
+
 			scoreboard/lost: none
 ]
 
@@ -613,20 +647,16 @@ if playing? [	; this is a hack, not sure why can't bring logic up the chain!
 		mouses [
 			mouse?
 		][
-;			mouse/velocity: mouse-coord - mouse/position
-			mouse/position: mouse-coord
+;			mouse/velocity: mouse-coord - mouse/position	; trackball style
+			mouse/position: mouse-coord						; follow position
 		]
-;		hiding [hidden?][
-;			fob: get id
-;			fob/visible?: false
-;		]
 		serve [
 			serving?
 		][
 ;(*
 			if any [
 				1 = time
-				0 = mod time 2 * tps * ((1 + length? balling) - (length? serving))
+				0 = mod time 4 * tps * ((1 + length? balling) - (length? serving))
 			][
 				; get reference to first ball on deck
 				ball: serving/1/right
@@ -635,12 +665,9 @@ if playing? [	; this is a hack, not sure why can't bring logic up the chain!
 				face/color: ball/face/color
 
 				; randomize ball physics
-;				ball/physics/position: to-point2D random face/size / 2
 				ball/physics/position: (face/size / 2) + ((face/size / 3) * box-muller)
 				ball/physics/position/x: max buffer/x min ball/physics/position/x face/size/x - buffer/x
 				ball/physics/position/y: max buffer/y min ball/physics/position/y face/size/y - buffer/y
-;				ball/physics/velocity/x: ball/physics/velocity/x * random/only [-1 1]
-;				ball/physics/velocity/y: ball/physics/velocity/y * random/only [-1 1]
 
 				ball/physics/velocity: absolute ball/physics/velocity
 				vel: ball/physics/velocity/x + ball/physics/velocity/y
@@ -675,11 +702,6 @@ if playing? [	; this is a hack, not sure why can't bring logic up the chain!
 ;(*
 			physics/position/x: physics/velocity/x + physics/position/x
 			physics/position/y: physics/velocity/y + physics/position/y
-
-
-;			physics/position/x: physics/velocity/x + any [ball/x physics/position/x]
-;			physics/position/y: physics/velocity/y + any [ball/y physics/position/y]
-	;		ball/x: ball/y: none	; clear bounce flags if available
 ;*)
 		]
 		ball-movement [moving? visible? ball?] [
@@ -692,10 +714,6 @@ if playing? [	; this is a hack, not sure why can't bring logic up the chain!
 		redraw [physics? visible?] [
 ;(*
 			fob: get id
-
-;? id
-;? fob
-
 			fob/offset: physics/position - (face/size / 2)
 ;*)
 		]
@@ -726,37 +744,20 @@ if playing? [	; this is a hack, not sure why can't bring logic up the chain!
 				mark: get 'fpscounter
 				mark/3: form min config/fps config/tps
 			]
-
-
-;			mark: get 'fpscounter
-;			either config/show-fps? [
-;				mark/3: form min config/fps config/tps
-;			][
-;				g: get game
-;				mark/3: form g/time
-;				if g/time > 116000 [
-;					config/tps: 6
-;					spt: 1 / config/tps
-;				]
+		]
+;		following [following? following-ai?] [
+;			sort/compare following :weight-by-absolute-closest-bumper
+;			foreach edge following [
+;				physics/velocity/(player/axis): edge/weight/(player/axis)
+;				break
 ;			]
-		]
-		following [following? following-ai?] [
-;(*
-			sort/compare following :weight-by-absolute-closest-bumper
-			foreach edge following [
-				physics/velocity/(player/axis): edge/weight/(player/axis)
-				break
-			]
-;*)
-		]
-		tracking [tracking? tracking-ai?] [
-;(*
-			foreach edge sort/compare tracking :weight-by-absolute-closest-bumper [
-				physics/velocity/(player/axis): edge/weight/(player/axis) ;+ edge/right/physics/velocity/y
-				break
-			]
-;*)
-		]
+;		]
+;		tracking [tracking? tracking-ai?] [
+;			foreach edge sort/compare tracking :weight-by-absolute-closest-bumper [
+;				physics/velocity/(player/axis): edge/weight/(player/axis) ;+ edge/right/physics/velocity/y
+;				break
+;			]
+;		]
 		extrapolating [extrapolating? extrapolating-ai?] [
 ;(*
 			foreach edge sort/compare extrapolating :weight-by-absolute-closest [
@@ -820,7 +821,7 @@ if playing? [	; this is a hack, not sure why can't bring logic up the chain!
 	initializers: [
 		view [face?] [
 			random/seed now/time/precise		; new random seed each run
-			window-spec: [title (form name)]	; empty titled window
+			window-spec: [title {Wall Y Ball 0.1}]	; empty titled window
 		][	; attach named face (graphical object) for each drawable entity
 			bind face/draw self
 			bind face/draw self/face	; evaluate face's draw code in context of face component
@@ -857,28 +858,14 @@ if playing? [	; this is a hack, not sure why can't bring logic up the chain!
 								text 393x68 "B"
 								text 525x68 "ll/"
 							]
-
 							fill-pen 82.100.255
 							pen 82.100.255
 							circle 570x108 6
-;							line-width 1
-;							fill-pen 207.207.207
-;							pen 207.207.207
-;							polygon 576x92 595x57 602x57 582x92
-
-
-;							fill-pen 255.127.127.127
-;							pen 255.127.127.127
-;							polygon 572x94 608x51 620x51 584x94
-
 							pen white
 							font font-subtitle
-
-							subtag: text 110x160 { Don't drop the balls....}
-
+							subtag: text 110x160 { Don't drop the b4lls....}
 							text 181x750  {Press SPACE key}
 							subcom: text 193x800 {to start / pause}
-
 						]
 					]
 				]
@@ -892,44 +879,47 @@ if playing? [	; this is a hack, not sure why can't bring logic up the chain!
 						"New" restart
 						"Exit"	exit
 					]
-					"Left" [
-						"Wall"	wall-left
-						"Paddle" [
-							"AI"	ai-left
-							"Mouse"	mouse-left
-							"Keyboard"	keyboard-left
-						]
-					]
-					"Top" [
-						"Wall"	wall-top
-						"Paddle" [
-							"AI"	ai-top
-							"Mouse"	mouse-top
-							"Keyboard"	keyboard-top
-						]
-					]
-					"Bottom" [
-						"Wall"	wall-bottom
-						"Paddle" [
-							"AI"	ai-bottom
-							"Mouse"	mouse-bottom
-							"Keyboard"	keyboard-bottom
-						]
-					]
-					"Right" [
-						"Wall"	wall-right
-						"Paddle" [
-							"AI"	ai-right
-							"Mouse"	mouse-right
-							"Keyboard"	keyboard-right
-						]
-					]
+;					"Left" [
+;						"Wall"	wall-left
+;						"Paddle" [
+;							"AI"	ai-left
+;							"Mouse"	mouse-left
+;							"Keyboard"	keyboard-left
+;						]
+;					]
+;					"Top" [
+;						"Wall"	wall-top
+;						"Paddle" [
+;							"AI"	ai-top
+;							"Mouse"	mouse-top
+;							"Keyboard"	keyboard-top
+;						]
+;					]
+;					"Bottom" [
+;						"Wall"	wall-bottom
+;						"Paddle" [
+;							"AI"	ai-bottom
+;							"Mouse"	mouse-bottom
+;							"Keyboard"	keyboard-bottom
+;						]
+;					]
+;					"Right" [
+;						"Wall"	wall-right
+;						"Paddle" [
+;							"AI"	ai-right
+;							"Mouse"	mouse-right
+;							"Keyboard"	keyboard-right
+;						]
+;					]
 					"Help" [
 						"Toggle FPS"	toggle-fps
-						"About w4llYb4ll!"	about
+						"About Wall Y Ball"	about
 					]
 				]
 				actors: object [
+					on-down: func [face event][
+						pause-resume
+					]
 					on-menu: func [face event][
 						switch event/picked [
 							toggle-fps [
@@ -938,8 +928,13 @@ if playing? [	; this is a hack, not sure why can't bring logic up the chain!
 									mark/3: ""
 								]
 							]
-							about []
-							pause [playing?: not playing?]
+							about [view/no-wait about]
+							pause [
+								pause-resume
+							]
+							restart [
+								restart-game
+							]
 							exit [quit]
 							wall-left []
 							wall-top []
@@ -951,89 +946,63 @@ if playing? [	; this is a hack, not sure why can't bring logic up the chain!
 					on-key-down: func [face event][
 						switch event/key [
 							#" " [
-								playing?: not playing?
-
-st: find splash/draw/4/3 'subtag
-st/4: { Don't drop the balls....}
-st: find splash/draw/4/3 'subcom
-st/4: {to start / pause}
-
-main/pane/2/visible?: not main/pane/2/visible?
-;? main/pane/2
-
+								pause-resume
 							]
 						]
 					]
 					on-close: func [face event][
 						running?: false
-;						quit
 					]
 				]
 			]
+
+
+			spt: 1 / tps				; invert for seconds per tick
 
 			; Ideally for simplicity we'd use a system timer event on the
 			; program window to trigger our event loop, but this is
 			; unreliable (jittery) on Windows.
 			; There's a PR to fix but hasn't been merged yet, so until then
 			; we'll build naieve event loop that wastes CPU time until next tick.
-			spt: 1 / tps					; invert for seconds per tick
-			view/options/no-wait/no-sync main options	; return immediately, refresh manually
-			n0: now/time/precise
-			while [running?] [
-				show main					; refresh window layout
-				do-no-sync [if playing? [execute]]		; process tick, queuing GUI events
-				do-events/no-wait			; process queued GUI events
-				t: mod n1: now/time/precise spt	; remaining time after tick
-				if n1 > n0 [
-					config/fps: to-integer round 1 / to-float (n1 - n0)
-				]
-				until [						; wait until new tick
-					(prior: t) > (t: mod n0: now/time/precise spt)
-				]
-;running?: false
-;halt
-			]
-
-;			append window-spec [rate 60 on-time [execute show face/parent]]
-;			view/no-sync/tight layout compose window-spec
-	;		append window-spec [rate 60 on-time [execute]]
-	;		view/tight layout compose window-spec
-;			view/options/tight layout compose window-spec [
-;				menu: [
-;					"Game" [
-;						"Restart" restart
-;					]
-;					"Player 1" [
-;						"Following" f1
-;						"Extrapolating" e1
-;						"awaiting" b1
-;					]
-;					"Player 2" [
-;						"Following" f2
-;						"Extrapolating" e2
-;						"awaiting" b2
-;					]
+;			view/options/no-wait/no-sync main options	; return immediately, refresh manually
+;			t0: now/time/precise
+;			while [running?] [
+;				show main					; refresh window layout
+;				do-no-sync [if playing? [execute]]		; process tick, queuing GUI events
+;				do-events/no-wait			; process queued GUI events
+;				t: mod t1: now/time/precise spt	; remaining time after tick
+;				if t1 > t0 [
+;					config/fps: to-integer round 1 / to-float (t1 - t0)
 ;				]
-;				actors: object [
-;					on-menu: func [face event][
-;	? event/picked
-;					]
+;				until [						; wait until new tick
+;					(prior: t) > (t: mod t0: now/time/precise spt)
 ;				]
 ;			]
-		]
 
+			t1: now/time/precise
+			append window-spec [
+				rate tps on-time [
+					t0: t1
+					if playing? [execute]
+					t1: now/time/precise
+					if t1 > t0 [
+						config/fps: to-integer round 1 / to-float (t1 - t0)
+					]
+				]
+			]
+			main: layout/tight compose window-spec
+			view/options main options
+		]
 
 		queue [ball?] [] [
 			physics/velocity/x: physics/velocity/x * random/only [-1 1]
 			physics/velocity/y: physics/velocity/y * random/only [-1 1]
-if mark: find window-spec id [
-	insert next next mark 'hidden
-]
+			if mark: find window-spec id [
+				insert next next mark 'hidden
+			]
 		][]
 	]
 ]
 
 w4llYb4ll!: graphecs/create 'w4llYb4ll! config
-
-
 do in w4llYb4ll! 'play
