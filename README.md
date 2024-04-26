@@ -1,3 +1,9 @@
+<picture>
+ <source media="(prefers-color-scheme: dark)" srcset="images/logo.png">
+ <source media="(prefers-color-scheme: light)" srcset="images/logo.png">
+ <img alt=" W4ll y B4ll Logo" src="images/logo.png">
+</picture>
+
 # W4ll y B4ll
 Table tennis meets hackey sack in this competitive juggling game for 0-4 players over 4 rounds. 4 walls and 4 balls for more balls-to-the-wall action!
 
