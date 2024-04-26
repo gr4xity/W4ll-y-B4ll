@@ -2,7 +2,7 @@ Red [
 
 ]
 
-help-title: {W4ll y B4ll! 0.1 - A Chaoskampf Prototype}
+help-title: {W4ll y B4ll! 0.2 - A Chaoskampf Prototype}
 help-text: {Steer your paddle with the mouse to keep balls in play.
 First player to drop 4 balls each round is eliminated.
 Last player standing faces a test of endurance and skill!
@@ -21,7 +21,7 @@ about-window: layout compose [
 	across
 	button "Ok" [unview about-window]
 	button "Information" [browse https://www.gravity4x.com/blog]
-	button "Give Feedback" [browse to-url {mailto:justin@gravity4x.com?subject=W4ll y B4ll 0.1}]
+	button "Give Feedback" [browse to-url {mailto:justin@gravity4x.com?subject=W4ll y B4ll 0.2}]
 	button "Say Thanks!" [browse https://www.paypal.me/Chaoskampf/5]
 ]
 

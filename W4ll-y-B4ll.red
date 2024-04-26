@@ -1,6 +1,6 @@
 Red [
 	Title "W4ll y B4ll"
-	Version: 0.1
+	Version: 0.2
 	Needs: 'View
 	Author: "Justin the Smith"
 	Company: "Chaoskampf Studios Ltd."
@@ -37,8 +37,8 @@ vertical-paddle-size: as-pair 2 window-size/y / 12
 horizontal-paddle-size: as-pair window-size/y / 12 2
 max-ball-radius: window-size/y / 144
 
-; define and create the game!
-graphecs/create W4ll-y-B4ll make graphecs/config [
+; define the game
+config: make graphecs/config [
 	entities:	#include %config/entities.red
 	components:	#include %config/components.red
 	conditions:	#include %config/conditions.red
@@ -48,5 +48,8 @@ graphecs/create W4ll-y-B4ll make graphecs/config [
 	initiators:	#include %config/initiators.red
 ]
 
-; let's do this!
+; create the game
+graphecs/create 'W4ll-y-B4ll config
+
+; play the game
 do in W4ll-y-B4ll 'play

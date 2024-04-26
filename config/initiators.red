@@ -3,7 +3,7 @@ Red [
 ][
 	view [face?] [
 		random/seed now/time/precise			; new random seed each run
-		window-spec: [title {W4ll y B4ll 0.1}]	; empty titled window
+		window-spec: [title {W4ll y B4ll 0.2}]	; empty titled window
 	][	; attach named face (graphical object) for each drawable entity
 		bind face/draw self
 		bind face/draw self/face	; evaluate face's draw code in context of face component

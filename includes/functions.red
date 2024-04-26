@@ -43,7 +43,7 @@ extrapolate-acceleration: func [
 restart-game: does [
 	; TODO: add re-initiator!
 	unview main
-	W4ll-y-B4ll: graphecs/create 'W4ll-y-B4ll config
+	graphecs/create 'W4ll-y-B4ll config
 	do in W4ll-y-B4ll 'play
 ]
 
