@@ -1,10 +1,10 @@
 Red [
-	Title "W4lly y B4ll"
+	Title "W4ll y B4ll"
 	Version: 0.1
 	Needs: 'View
-	Icon: %icons/64x64.ico
 	Author: "Justin the Smith"
 	Company: "Chaoskampf Studios Ltd."
+	Icon: %icons/64x64.ico
 ]
 
 ; include other code/data
