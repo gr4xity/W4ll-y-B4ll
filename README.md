@@ -7,6 +7,10 @@
 # W4ll y B4ll
 Table tennis meets hackey sack in this competitive juggling game for 0-4 players over 4 rounds. 4 walls and 4 balls for more balls-to-the-wall action!
 
+## Get Started
+1. Download and install the [fonts](fonts/)
+2. Download and run the Windows [binary](bin/)
+
 ## Gameplay
 Steer your paddle with the mouse to keep balls in play.
 First player to drop 4 balls each round is eliminated.
