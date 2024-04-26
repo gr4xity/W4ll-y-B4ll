@@ -3,24 +3,26 @@ Red [
 ]
 
 help-title: {W4ll y B4ll! 0.1 - A Chaoskampf Prototype}
-help-text: {Steer your paddle with the mouse to keep the balls in play!
+help-text: {Steer your paddle with the mouse to keep balls in play.
+First player to drop 4 balls each round is eliminated.
+Last player standing faces a test of endurance and skill!
 
-Each round, the first player to drop 4 balls is eliminated, replaced with a reflective wall that keeps balls coming.
+Press the SPACE key to start each round or pause.
 
-Last player standing faces a challenge of endurance, skill, and luck!
-
-Press the SPACE key to start each round or pause the game.}
+This is the first test of a new kind of game engine.
+Feedback and support are very welcome!
+}
 
 about-window: layout compose [
 	title "About W4ll y B4ll"
 	below
-	text 310x32 center font-name "Formera" font-size 14 (help-title)
-	rich-text 316x240 font-name "Formera" font-size 12 (help-text)
+	text 346x32 center font-name "Formera" font-size 15 (help-title)
+	rich-text 346x160 font-name "Formera" font-size 12 (help-text)
 	across
 	button "Ok" [unview about-window]
 	button "Information" [browse https://www.gravity4x.com/blog]
-	button "Feedback" [browse to-url {mailto:justin@gravity4x.com?subject=W4ll y B4ll 0.1}]
-	button "Say Thanks" [browse https://www.paypal.me/Chaoskampf/5]
+	button "Give Feedback" [browse to-url {mailto:justin@gravity4x.com?subject=W4ll y B4ll 0.1}]
+	button "Say Thanks!" [browse https://www.paypal.me/Chaoskampf/5]
 ]
 
 ; define shared vector drawing code for entities
