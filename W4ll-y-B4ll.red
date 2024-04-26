@@ -49,4 +49,4 @@ graphecs/create W4ll-y-B4ll make graphecs/config [
 ]
 
 ; let's do this!
-W4ll-y-B4ll/play
+do in W4ll-y-B4ll 'play
