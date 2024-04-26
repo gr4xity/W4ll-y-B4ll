@@ -2,9 +2,11 @@
 Table tennis meets hackey sack in this competitive juggling game for 0-4 players over 4 rounds. 4 walls and 4 balls for more balls-to-the-wall action!
 
 ## Gameplay
-Move your paddle with the mouse to keep the balls in play!
+Steer your paddle with the mouse to keep balls in play.
+First player to drop 4 balls each round is eliminated.
+Last player standing faces a test of endurance and skill!
 
-Each round, the first player to drop 4 balls is eliminated. The weakest player is replaced with a wall, intensifying the action. Last player standing faces a challenge of endurance, skill, and luck!
+Press the SPACE key to start each round or pause.
 
 ## Requirements
 ### Run-Time
