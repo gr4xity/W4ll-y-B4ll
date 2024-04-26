@@ -41,57 +41,7 @@ extrapolate-acceleration: func [
 ]
 
 restart-game: does [
-
-; top-down imperative approach is no fun!
-comment [
-	g: W4ll-y-B4ll
-	foreach bumper g/collections/bumper? [
-		bumper: g/entities/:bumper
-		unless bumper/components/player? [
-			; TODO: this fails to create prior reactive functions on object
-			bumper/components/player: context compose/deep [axis: (select ['x 'y 'x] bumper/components/bumper/axis) side: (to-lit-word bumper/id)]
-
-			; reset face
-			switch bumper/components/player/axis [
-				x [
-					bumper/components/face/size: horizontal-paddle-size
-					bumper/components/face/draw: draw-horizontal-paddle
-				]
-				y [
-					bumper/components/face/size: vertical-paddle-size
-					bumper/components/face/draw: draw-vertical-paddle
-				]
-			]
-
-			; redraw face in active object
-			fob: get bumper/id
-			fob/size: bumper/components/face/size
-			bind bumper/components/face/draw bumper/components
-			bind bumper/components/face/draw bumper/components/face	; evaluate face's draw code in context of face component
-			fob/draw: compose/deep bumper/components/face/draw
-		]
-
-		foreach board g/collections/scoreboard? [
-			board: g/entities/:board
-
-			; hide all the balls
-			foreach edge board/components/balling [
-				fob: get edge/rid
-				ball: g/entities/(edge/rid)
-				fob/visible?: ball/components/face/visible?: false
-			]
-
-			; reset scores
-			foreach edge board/components/scoring [
-				edge/weight: starting-balls
-				mark: get to-word rejoin [edge/rid '-score]
-				mark/3: form edge/weight
-			]
-		]
-	]
-]
-
-	; TODO: re-create!
+	; TODO: add re-initiator!
 	unview main
 	W4ll-y-B4ll: graphecs/create 'W4ll-y-B4ll config
 	do in W4ll-y-B4ll 'play
