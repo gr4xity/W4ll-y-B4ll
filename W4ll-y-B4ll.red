@@ -15,7 +15,7 @@ Red [
 
 ; global definitions
 W4ll-y-B4ll: 'W4ll-y-B4ll	; a word to reference the game
-main: none					; reference for compiler
+main: none					; reference to main UI window for compiler
 fps: tps: 60				; actual and targetd frames/ticks per second
 show-fps?: false			; draw FPS conter while true, silent when false
 running?: true				; iterate while true, exit when false
