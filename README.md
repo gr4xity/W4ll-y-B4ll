@@ -21,3 +21,6 @@ Press the SPACE key to start each round or pause.
 ## Build
 * *Red Toolchain*: [https://www.red-lang.org](https://www.red-lang.org/p/download.html)
 * *graphecs* engine: https://github.com/gr4xity/graphecs (private)
+
+# Issues
+The Red toolchain compiles directly to native code with no external dependencies. Unfamiliarity may freak out your anti-virus protection with false positives. [See more information here](https://github.com/red/red/wiki/%5BNOTE%5D-Anti-virus-false-positives).
