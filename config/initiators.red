@@ -101,40 +101,55 @@ Red [
 		]
 
 		spt: 1 / tps				; invert for seconds per tick
+;? tps
+;? spt
 
 		; Ideally for simplicity we'd use a system timer event on the
 		; program window to trigger our event loop, but this is
 		; unreliable (jittery) on Windows.
 		; There's a PR to fix but hasn't been merged yet, so until then
 		; we'll build naieve event loop that wastes CPU time until next tick.
-;			view/options/no-wait/no-sync main options	; return immediately, refresh manually
-;			t0: now/time/precise
-;			while [running?] [
-;				show main					; refresh window layout
-;				do-no-sync [if playing? [execute]]		; process tick, queuing GUI events
-;				do-events/no-wait			; process queued GUI events
-;				t: mod t1: now/time/precise spt	; remaining time after tick
+		main: layout/tight compose window-spec
+		view/options/no-wait/no-sync main options	; return immediately, refresh manually
+		t0: now/time/precise
+		while [running?] [
+;? t0
+			show main								; refresh window layout
+			do-no-sync [if playing? [execute]]		; process tick, queuing GUI events
+			do-events/no-wait						; process queued GUI events
+			t: mod t1: now/time/precise spt			; remaining time after tick
+
+;? t1
+;? t
+
+			if t1 > t0 [
+				fps: to-integer round 1 / to-float (t1 - t0)
+;? fps
+			]
+;			wait t / 2
+			wait spt - t
+;			until [									; until new tick
+				(prior: t) >= (t: mod t0: now/time/precise spt)
+;? t
+;? prior
+;prior
+;			]
+;halt
+		]
+
+;		t1: now/time/precise
+;		append window-spec [
+;			rate tps on-time [
+;				t0: t1
+;				if playing? [execute]
+;				t1: now/time/precise
 ;				if t1 > t0 [
-;					config/fps: to-integer round 1 / to-float (t1 - t0)
-;				]
-;				until [						; wait until new tick
-;					(prior: t) > (t: mod t0: now/time/precise spt)
+;					fps: to-integer round 1 / to-float (t1 - t0)
 ;				]
 ;			]
-
-		t1: now/time/precise
-		append window-spec [
-			rate tps on-time [
-				t0: t1
-				if playing? [execute]
-				t1: now/time/precise
-				if t1 > t0 [
-					fps: to-integer round 1 / to-float (t1 - t0)
-				]
-			]
-		]
-		main: layout/tight compose window-spec
-		view/options main options
+;		]
+;		main: layout/tight compose window-spec
+;		view/options main options
 	]
 
 	queue [ball?] [] [

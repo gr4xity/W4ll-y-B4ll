@@ -21,13 +21,13 @@ show-fps?: false			; draw FPS conter while true, silent when false
 running?: true				; iterate while true, exit when false
 playing?: false				; operate the game while true, pause when false
 starting-balls: 4			; initial score for each player
-mouse-coord: 0x0			; define a mouse coordinate 
+mouse-coord: 0x0			; define a mouse coordinate
 window-size: 0.8 * as-pair system/view/screens/1/size/y system/view/screens/1/size/y
 
 ; define speed limits accordingly
 global-speed-limit: to point2D! reduce [
-	window-size/x / tps ;/ 1.5
-	window-size/x / tps ;/ 1.5
+	window-size/x / fps / 2
+	window-size/x / fps / 2
 ]
 player-speed-ratio: 75%		; relative (AI) player speed
 
