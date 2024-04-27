@@ -1,10 +1,10 @@
 Red [
 	Title "W4ll y B4ll"
 	Version: 0.0.0.3
+	Date: 2024-04-26
 	Needs: 'View
 	Author: "Justin the Smith"
 	Company: "Chaoskampf Studios Ltd."
-	Copyright "2024 Chaoskampf Studios Ltd."
 	Icon: %icons/64x64.ico
 ]
 
