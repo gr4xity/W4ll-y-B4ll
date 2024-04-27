@@ -1,9 +1,10 @@
 Red [
 	Title "W4ll y B4ll"
-	Version: 0.2
+	Version: 0.0.0.3
 	Needs: 'View
 	Author: "Justin the Smith"
 	Company: "Chaoskampf Studios Ltd."
+	Copyright "2024 Chaoskampf Studios Ltd."
 	Icon: %icons/64x64.ico
 ]
 
@@ -14,21 +15,19 @@ Red [
 #include %includes/gui.red
 
 ; global definitions
-W4ll-y-B4ll: 'W4ll-y-B4ll	; a word to reference the game
-main: none					; reference to main UI window for compiler
+W4ll-y-B4ll: main: none		; references to the game and main UI window for compiler
 fps: tps: 60				; actual and targetd frames/ticks per second
 show-fps?: false			; draw FPS conter while true, silent when false
 running?: true				; iterate while true, exit when false
 playing?: false				; operate the game while true, pause when false
 starting-balls: 4			; initial score for each player
 mouse-coord: 0x0			; define a mouse coordinate
-window-size: 0.8 * as-pair system/view/screens/1/size/y system/view/screens/1/size/y
+
+; define window size based on primary screen
+window-size: 0.85 * as-pair system/view/screens/1/size/y system/view/screens/1/size/y
 
 ; define speed limits accordingly
-global-speed-limit: to point2D! reduce [
-	window-size/x / fps / 2
-	window-size/x / fps / 2
-]
+global-speed-limit: (to point2D! window-size) / fps / 2
 player-speed-ratio: 75%		; relative (AI) player speed
 
 ; define parameters for entity sizes accordingly
@@ -48,8 +47,6 @@ config: make graphecs/config [
 	initiators:	#include %config/initiators.red
 ]
 
-; create the game
+; create and play the game!
 graphecs/create 'W4ll-y-B4ll config
-
-; play the game
 do in W4ll-y-B4ll 'play
