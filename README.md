@@ -6,7 +6,7 @@
 
 # Get Started
 1. Download and install the [fonts](fonts/)
-2. Download and run the Windows [binary](bin/)
+2. Download, unzip, and run the Windows [binary](bin/)
 
 # Gameplay
 Steer your paddle with the mouse to keep balls in play.
