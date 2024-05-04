@@ -1,7 +1,7 @@
 Red [
 	Title "W4ll y B4ll"
-	Version: 0.0.0.3
-	Date: 2024-04-26
+	Version: 0.0.0.5
+	Date: 2024-05-03
 	Needs: 'View
 	Author: "Justin the Smith"
 	Company: "Chaoskampf Studios Ltd."
@@ -15,7 +15,7 @@ Red [
 #include %includes/gui.red
 
 ; global definitions
-W4ll-y-B4ll: main: none		; references to the game and main UI window for compiler
+main: none					; reference to main UI window for compiler
 fps: tps: 60				; actual and targetd frames/ticks per second
 show-fps?: false			; draw FPS conter while true, silent when false
 running?: true				; iterate while true, exit when false
@@ -36,17 +36,16 @@ vertical-paddle-size: as-pair 2 window-size/y / 12
 horizontal-paddle-size: as-pair window-size/y / 12 2
 max-ball-radius: window-size/y / 144
 
-; define the game
-config: make graphecs/config [
+; create and play the game!
+W4ll-y-B4ll: none
+graphecs/create 'W4ll-y-B4ll [
+	groups:		#include %config/groups.red
+	relations:	#include %config/relations.red
+	activators:	#include %config/activators.red
+	procedures:	#include %config/procedures.red
+
 	entities:	#include %config/entities.red
 	components:	#include %config/components.red
-	conditions:	#include %config/conditions.red
 	systems:	#include %config/systems.red
-	relations:	#include %config/relations.red
-	reactions:	#include %config/reactions.red
-	initiators:	#include %config/initiators.red
 ]
-
-; create and play the game!
-graphecs/create 'W4ll-y-B4ll config
 do in W4ll-y-B4ll 'play
