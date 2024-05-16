@@ -1,12 +1,11 @@
 Red [
 	Title "W4ll y B4ll Activators"
-	Version: 0.0.0.5
-	Date: 2024-05-03
+	Version: 0.0.0.6
+	Date: 2024-05-15
 	Author: "Justin the Smith"
 	Company: "Chaoskampf Studios Ltd."
 ][
 	view [face?] [
-		random/seed now/time/precise		; new random seed each run
 		window-spec: compose/deep [
 			title {W4ll y B4ll}
 			origin 0x0

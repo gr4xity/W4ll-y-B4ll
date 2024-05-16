@@ -16,10 +16,10 @@ Red [
 
 ; global definitions
 main: none						; reference to main UI window for compiler
+random/seed now/time/precise	; new random seed each run
+system/view/auto-sync?: false	; manually update UI
 
-system/view/auto-sync?: false
-
-game-config: make reactor! [
+game-config: context [
 	fps: tps: 60				; actual and targetd frames/ticks per second
 	show-fps?: false			; draw FPS conter while true, silent when false
 	running?: true				; iterate while true, exit when false
@@ -38,10 +38,10 @@ game-config: make reactor! [
 	player-speed-ratio: 75%		; relative (AI) player speed
 
 	; define parameters for entity sizes accordingly
-	relate buffer: [window-size * 0.03]	; space behind paddles
-	relate vertical-paddle-size: [as-pair 2 window-size/y / 12]
-	relate horizontal-paddle-size: [as-pair window-size/y / 12 2]
-	relate max-ball-radius: [window-size/y / 144]
+	buffer: window-size * 0.03	; space behind paddles
+	vertical-paddle-size: as-pair 2 window-size/y / 12
+	horizontal-paddle-size: as-pair window-size/y / 12 2
+	max-ball-radius: window-size/y / 144
 
 	groups:		#include %config/groups.red
 	relations:	#include %config/relations.red
