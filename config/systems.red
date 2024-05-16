@@ -5,21 +5,21 @@ Red [
 		scoreboard? reset?
 	][
 
-		if playing? [	; this is a hack, not sure why can't bring logic up the chain!
+		if game-config/playing? [	; this is a hack, not sure why can't bring logic up the chain!
 
 			; get key entities
 			g: get game
 			loser: g/entities/(scoreboard/lost)
 
 			; reset physics
-			loser/components/physics/position/(loser/components/player/axis): window-size/(loser/components/player/axis) / 2
+			loser/components/physics/position/(loser/components/player/axis): game-config/window-size/(loser/components/player/axis) / 2
 			loser/components/physics/velocity: (0, 0)
 
 			; remove player control
 			loser/components/player: none
 
 			; reset face
-			loser/components/face/size: window-size
+			loser/components/face/size: game-config/window-size
 			loser/components/face/size/(loser/components/bumper/axis): 1
 			loser/components/face/draw: [
 				pen (color)	line 0x0 (size)
@@ -30,18 +30,24 @@ Red [
 			fob/size: loser/components/face/size
 			bind loser/components/face/draw loser/components
 			bind loser/components/face/draw loser/components/face	; evaluate face's draw code in context of face component
-			fob/draw: compose/deep loser/components/face/draw
+;			fob/draw/5: compose/deep loser/components/face/draw
 
+			fob/draw: compose/deep [
+				s: scale (game-config/render-scale/x) (game-config/render-scale/y) [
+					(compose/deep loser/components/face/draw)
+				]
+			]
+;? fob/draw
 			; hide all the balls
 			foreach edge balling [
-				fob: get edge/rid
+		 		fob: get edge/rid
 				ball: g/entities/(edge/rid)
 				fob/visible?: ball/components/face/visible?: false
 			]
 
 			; reset scores
 			foreach edge scoring [
-				edge/weight: starting-balls
+				edge/weight: game-config/starting-balls
 				mark: get to-word rejoin [edge/rid '-score]
 				mark/3: form edge/weight
 			]
@@ -58,15 +64,15 @@ Red [
 	mouses [
 		mouse?
 	][
-;		mouse/velocity: mouse-coord - mouse/position	; trackball style
-		mouse/position: mouse-coord						; follow position
+;		mouse/velocity: game-config/mouse-coord - mouse/position	; trackball style
+		mouse/position: game-config/mouse-coord				; follow position
 	]
 	serve [
 		serving?
 	][
 		if any [
 			1 = time
-			0 = mod time 4 * tps * ((1 + length? balling) - (length? serving))
+			0 = mod time 4 * game-config/tps * ((1 + length? balling) - (length? serving))
 		][
 			; get reference to first ball on deck
 			ball: serving/1/right
@@ -76,8 +82,8 @@ Red [
 
 			; randomize ball physics
 			ball/physics/position: (face/size / 2) + ((face/size / 3) * box-muller)
-			ball/physics/position/x: max buffer/x min ball/physics/position/x face/size/x - buffer/x
-			ball/physics/position/y: max buffer/y min ball/physics/position/y face/size/y - buffer/y
+			ball/physics/position/x: max game-config/buffer/x min ball/physics/position/x face/size/x - game-config/buffer/x
+			ball/physics/position/y: max game-config/buffer/y min ball/physics/position/y face/size/y - game-config/buffer/y
 
 			ball/physics/velocity: absolute ball/physics/velocity
 			vel: ball/physics/velocity/x + ball/physics/velocity/y
@@ -112,18 +118,17 @@ Red [
 		if ball/y [physics/position/y: physics/velocity/y + ball/y]
 		ball/x: ball/y: none	; clear bounce flags if available
 	]
-
 	redraw [physics? visible?] [
 		fob: get id
-		fob/offset: physics/position - (face/size / 2)
+		fob/offset: (game-config/render-scale * physics/position) - (face/size / 2 / game-config/render-scale)
 	]
 	motion-blur [moving? visible? ball?] [
 		fob: get id
-		fob/draw/5: fob/draw/10: (-1 * physics/velocity) + (face/size / 2)
+		fob/draw/5/5: fob/draw/5/10: (-1 * physics/velocity) + (face/size / 2)
 	]
 	recolor [recolorable?] [
 		fob: get id
-		fob/draw/2: face/color
+		fob/draw/5/2: face/color
 	]
 	bleach [has-color?] [
 		face/color: face/color + 3.3.3.0
@@ -132,9 +137,9 @@ Red [
 		face/color/4: to-integer divide first sort reduce [face/color/1 face/color/2 face/color/3] 2
 	]
 	fps [scoreboard?] [
-		if show-fps? [
+		if game-config/show-fps? [
 			mark: get 'fpscounter
-			mark/3: form min fps tps
+			mark/3: form min game-config/fps game-config/tps
 		]
 	]
 ;		following [following? following-ai?] [
@@ -168,7 +173,7 @@ Red [
 					]
 				]
 			]
-			(window-size/(player/axis) / 2) - physics/position/(player/axis)
+			(game-config/window-size/(player/axis) / 2) - physics/position/(player/axis)
 		]
 	]
 	forgiving [extrapolating? forgiving-ai?] [
@@ -185,7 +190,7 @@ Red [
 					]
 				]
 			]
-			(window-size/(player/axis) / 2) - physics/position/(player/axis)
+			(game-config/window-size/(player/axis) / 2) - physics/position/(player/axis)
 		]
 	]
 

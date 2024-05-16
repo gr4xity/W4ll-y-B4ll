@@ -48,14 +48,14 @@ restart-game: does [
 ]
 
 pause-resume: does [
-	playing?: not playing?
-	unless equal? playing? main/pane/2/visible? [
+	game-config/playing?: not game-config/playing?
+	unless equal? game-config/playing? main/pane/2/visible? [
 		restart-game
 	]
-	st: find splash/draw/4/3 'subtag
+	st: find splash/draw/5/3 'subtag
 	st/4: { Don't drop the b4lls....}
-	st: find splash/draw/4/3 'subcom
+	st: find splash/draw/5/3 'subcom
 	st/4: {to start / pause}
-	main/pane/2/visible?: not playing?
+	main/pane/2/visible?: not game-config/playing?
 ]
 

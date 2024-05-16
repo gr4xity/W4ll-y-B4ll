@@ -5,16 +5,18 @@ Red [
 		scoreboard []
 		face [
 			size: window-size	; full court!
-			background: black	; turf
+			background: transparent	; turf
 			color: 255.255.255.128			; net
 			font: make font! [
 				name: "Formera"
 				size: to-integer round window-size/y / 16
+;				relate size: [to-integer round window-size/y / 16]
 				anti-alias?: true
 			]
 			subfont: make font! [
 				name: "Formera"
 				size: to-integer round window-size/y / 64
+;				relate size: [to-integer round window-size/y / 64]
 				anti-alias?: true
 			]
 			draw: [
@@ -43,10 +45,13 @@ Red [
 				window-size/x / 2
 				random window-size/y
 			]
-			velocity: global-speed-limit * (power player-speed-ratio 3) ;/ 2
+			velocity: global-speed-limit * (power player-speed-ratio 3)
+;			relate speed: [game-config/global-speed-limit * (power game-config/player-speed-ratio 3)]
+;			velocity: speed
 		]
 		face [
-			size: max-ball-radius * global-speed-limit
+			size: game-config/max-ball-radius * game-config/global-speed-limit
+;			relate size: [game-config/max-ball-radius * game-config/global-speed-limit]
 			draw: draw-ball
 			color: 82.100.255
 			visible?: false

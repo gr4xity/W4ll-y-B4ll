@@ -7,21 +7,13 @@ Red [
 ][
 	view [face?] [
 		random/seed now/time/precise		; new random seed each run
-		window-spec: [title {W4ll y B4ll}]	; empty titled window
-	][	; attach named face (graphical object) for each drawable entity
-		bind face/draw self
-		bind face/draw self/face	; evaluate face's draw code in context of face component
-		append window-spec compose/deep [
-			origin 0x0	; overlap
-			(to-set-word id) base (face/size) (face/background)  draw [
-				(compose/deep face/draw)
-			] all-over on-over [
-				dm: event/offset - mouse-coord
-				mouse-coord: event/offset
-			]
+		window-spec: compose/deep [
+			title {W4ll y B4ll}
 			origin 0x0
-			splash: base (face/size) transparent draw [
-				scale (window-size/x / 1000) (window-size/y / 1000) [
+			base (game-config/window-size) black all-over
+			origin 0x0
+			splash: base (game-config/window-size) transparent draw [
+				s: scale (game-config/render-scale/x * game-config/window-size/x / 1000) (game-config/render-scale/y * game-config/window-size/y / 1000) [
 					translate (as-pair 160 20) [
 						scale 1 0.5 [
 							font font-suptitle
@@ -50,9 +42,21 @@ Red [
 					]
 				]
 			]
+		]	; empty titled window
+	][	; attach named face (graphical object) for each drawable entity
+		bind face/draw self
+		bind face/draw self/face	; evaluate face's draw code in context of face component
+		append window-spec compose/deep [
+			origin 0x0	; overlap
+			(to-set-word id) base (face/size) (face/background) draw [
+				s: scale (game-config/render-scale/x) (game-config/render-scale/y) [
+					(compose/deep face/draw)
+				]
+			]
 		]
 	][	; generate and view ui layout, event loop
 		main: layout/tight compose window-spec
+		flags: []
 		options: [
 			menu: [
 				"Game" [
@@ -69,7 +73,7 @@ Red [
 				on-menu: func [face event][
 					switch event/picked [
 						toggle-fps [
-							unless show-fps?: not show-fps? [
+							unless game-config/show-fps?: not game-config/show-fps? [
 								mark: get 'fpscounter
 								mark/3: ""
 							]
@@ -97,51 +101,49 @@ Red [
 					]
 				]
 				on-close: func [face event][
-					running?: false
+					game-config/running?: false
 				]
-			]
-		]
-
-		spt: 1 / tps				; invert for seconds per tick
-
-		; Ideally for simplicity we'd use a system timer event on the
-		; program window to trigger our event loop
-		comment [
-			t0: t1: now/time/precise
-			append window-spec [
-				rate tps on-time [
-					if playing? [
-						if t1 > t0 [
-							fps: to-integer round 1 / to-float (t1 - t0)
+				on-over: func [face event][
+					dm: event/offset - game-config/mouse-coord
+					game-config/mouse-coord: event/offset
+				]
+				on-resize: func [face event][
+;					delta: face/size - game-config/window-size
+;					either (absolute delta/x) > (absolute delta/y) [
+						face/size/y: face/size/x
+;					][
+;						face/size/x: face/size/y
+;					]
+					old-scale: game-config/render-scale
+					game-config/render-scale: face/size / game-config/window-size
+					foreach pane face/pane [
+						if s: find pane/draw 'scale [
+							s/2: s/2 * game-config/render-scale/x / old-scale/x
+							s/3: s/3 * game-config/render-scale/y / old-scale/y
 						]
-						t0: t1
-						execute
-						t1: now/time/precise
+						pane/offset: pane/offset * game-config/render-scale / old-scale
+						if pane/type = 'base [
+							pane/size: pane/size * game-config/render-scale / old-scale
+						]
 					]
 				]
 			]
-			main: layout/tight compose window-spec
-			view/options main options
 		]
 
-		; but this is unreliable (jittery) on Windows.
-		; There's a PR to fix but hasn't been merged yet, so until then
-		; we'll build naieve event loop that wastes CPU time until next tick!
 		main: layout/tight compose window-spec
-		view/options/no-wait/no-sync main options	; return immediately, refresh manually
-		t0: now/time/precise
-		while [running?] [
-			show main								; refresh window layout
-			do-no-sync [if playing? [execute]]		; process tick, queuing GUI events
-			do-events/no-wait						; process queued GUI events
-			t: mod t1: now/time/precise spt			; remaining time after tick
-			if t1 > t0 [
-				fps: to-integer round 1 / to-float (t1 - t0)
-			]
-			wait t - 0:0:0.0001
-			until [									; until new tick
-				wait 0:0:0.0001
-				(prior: t) > (t: mod t0: now/time/precise spt)
+		view/options/flags/no-wait/no-sync main options	flags; return immediately, refresh manually	
+		t: mod now/time/precise game-config/spt
+		while [game-config/running?] [
+			t0: now/time/precise
+			if game-config/playing? [execute]
+			show main
+			t1: now/time/precise
+			game-config/fps: either t1 > t0 [
+				to-integer round 1 / (t1 - t0)
+			][0]
+			until [
+				do-events/no-wait
+				(prior: t) > (t: mod now/time/precise game-config/spt)
 			]
 		]
 	]

@@ -26,7 +26,7 @@ Red [
 	]
 
 	scoring [scoreboard? face?] [player? physics?] [
-		starting-balls
+		game-config/starting-balls
 	]
 
 	; will the paddle stay in the court?
